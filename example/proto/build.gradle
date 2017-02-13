@@ -1,0 +1,78 @@
+group 'com.ymatou.op.registry.example'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext.grpc_version = '1.0.3'
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.0'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'com.google.protobuf'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "io.grpc:grpc-netty:$grpc_version"
+    compile "io.grpc:grpc-protobuf:$grpc_version"
+    compile "io.grpc:grpc-stub:$grpc_version"
+    compile "com.google.api:api-annotations:1.0.0"
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/proto'
+        }
+        java {
+            srcDirs 'src/main/java', 'src/generated/main/java', 'src/generated/main/grpc'
+        }
+    }
+}
+
+
+protobuf {
+    generateProtoTasks.generatedFilesBaseDir = "${projectDir}/src/generated"
+
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.0.0"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:$grpc_version"
+        }
+    }
+
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {
+                option 'enable_deprecated=false'
+            }
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+
+clean {
+    delete protobuf.generatedFilesBaseDir
+}

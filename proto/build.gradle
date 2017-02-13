@@ -1,0 +1,77 @@
+group 'com.github.comynli.grpc.gateway'
+version '1.0.0'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.0'
+    }
+}
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'com.google.protobuf'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "io.grpc:grpc-netty:$grpc_version"
+    compile "io.grpc:grpc-protobuf:$grpc_version"
+    compile "io.grpc:grpc-stub:$grpc_version"
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/proto'
+        }
+        java {
+            srcDirs 'src/main/java', 'src/generated/main/java', 'src/generated/main/grpc'
+        }
+    }
+}
+
+
+protobuf {
+    generateProtoTasks.generatedFilesBaseDir = "${projectDir}/src/generated"
+
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.1.0"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:$grpc_version"
+        }
+    }
+
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {
+                option 'enable_deprecated=false'
+            }
+        }
+    }
+}
+
+clean {
+    delete protobuf.generatedFilesBaseDir
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'com.google.api'
+            artifactId 'api-annotations'
+            from components.java
+        }
+    }
+}
+

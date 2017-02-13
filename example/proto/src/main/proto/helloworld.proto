@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package helloworld;
+
+option java_multiple_files = true;
+option java_package = "com.github.comynli.grpc.proto";
+option java_outer_classname = "HelloWorldProto";
+
+import "google/api/annotations.proto";
+
+// The greeting service definition.
+service Greeter {
+    // Sends a greeting
+    rpc SayHello (HelloRequest) returns (HelloRequest) {
+        option (google.api.http) = {
+            get: "/say/:name"
+        };
+    }
+
+    rpc SayHelloClientStream(stream HelloRequest) returns (HelloRequest) {
+        option (google.api.http) = {
+            get: "/stream/client"
+        };
+    }
+
+    rpc SayHelloServerStream(HelloRequest) returns (stream HelloRequest) {
+        option (google.api.http) = {
+            get: "/stream/server"
+        };
+    }
+
+    rpc SayHelloBidiStream(stream HelloRequest) returns (stream HelloRequest) {
+        option (google.api.http) = {
+            get: "/stream/bidi"
+        };
+    }
+}
+
+
+// The request message containing the user's name.
+message HelloRequest {
+    string name = 1;
+    int32 age = 2;
+    enum Status {
+        A = 0;
+        B = 1;
+    }
+    Status status = 3;
+    message Nest {
+        string message = 1;
+        Status status = 2;
+    }
+    Nest nest = 4;
+    string full_name = 5;
+}
